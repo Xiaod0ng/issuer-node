@@ -7,9 +7,7 @@ bin/
 *.so
 *.dylib
 
-.env-api
-.env-issuer
-.env-ui
+
 
 infrastructure/local/.vault/data
 infrastructure/local/.vault/plugins
@@ -18,6 +16,8 @@ infrastructure/local/.vault/file
 
 .fleet
 .vscode/
+
+/node_modules
 
 # Test binary, built with `go test -c`
 *.test
