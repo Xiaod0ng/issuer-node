@@ -42,3 +42,5 @@ If all variables are configured properly, you need to follow the steps below.
 3. In Linux terminal, run `make up`
 
 You should be able to navigate to the sites.
+
+Possible Problems:
