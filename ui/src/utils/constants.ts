@@ -57,7 +57,7 @@ export const DOTS_DROPDOWN_WIDTH = 60;
 
 export const FEEDBACK_URL = "https://forms.gle/W8xuqY3UjPnY5Nj16";
 
-export const IMAGE_PLACEHOLDER_PATH = "/images/image-preview.png";
+export const IMAGE_PLACEHOLDER_PATH = "/images/image-preview.jpg";
 
 export const POLLING_INTERVAL = 10000;
 
