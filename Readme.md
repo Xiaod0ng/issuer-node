@@ -49,7 +49,7 @@ make generate-issuer-did
 
 7. Run `make run-ui` to start UI
 
-8. Open Ngrok terminal, run `ngrok http --domain usefully-blessed-sunbird.ngrok-free.app 8088` to start the tunnel.
+8. Open Ngrok terminal, run `ngrok http --domain usefully-blessed-sunbird.ngrok-free.app 8088 --response-header-add "Access-Control-Allow-Origin: *"` to start the tunnel.
 
 It may return ERR_NGROK_3200 error, please close the terminal, then repeat step 8.
 
