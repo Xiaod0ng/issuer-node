@@ -32,3 +32,7 @@ tools/changelog/changelog.md
 # vendor/
 
 .DS_STORE
+
+.env-api
+.env-issuer
+.env-ui
