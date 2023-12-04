@@ -1,228 +1,112 @@
-# Polygon ID Issuer Node
+# Running the system for the first time
 
-[![Checks](https://github.com/0xPolygonID/sh-id-platform/actions/workflows/checks.yml/badge.svg)](https://github.com/0xPolygonID/sh-id-platform/actions/workflows/checks.yml)
-[![golangci-lint](https://github.com/0xPolygonID/sh-id-platform/actions/workflows/golangci-lint.yml/badge.svg)](https://github.com/0xPolygonID/sh-id-platform/actions/workflows/golangci-lint.yml)
+## Common steps
 
-Streamline the **Verifiable Credentials issuance** process with the user-friendly API and UI of the Issuer Node within the Polygon ID ecosystem. The on-premise (self-hosted) Issuer Node, seamlessly integrated with a robust suite of tools including the mobile Wallet, Schema Builder, and Credential Marketplace, guarantees a frictionless experience for effortlessly issuing and verifying credentials.
+1. Install git on linux system. I am using windows subsystem for linux (WSL) on windows 11.
 
-![Triagle-of-trust](docs/assets/img/triangle-of-trust.png)
+2. Clone the repository
 
-**Features:**
-
-* Create Issuer Identities.
-* Issue VCs.
-* Revoke VCs.
-* Fetch VCs.
-* Transit Issuer's state.
-* Create Issuer-User connections.
-* Issuer's UI.
-
----
-
-## Table of Contents
-
-- [Quick Start Installation](#quick-start-installation)
-    - [Prerequisites](#Prerequisites)
-    - [Issuer Node Api](#issuer-node-api)
-    - [Issuer Node UI](#issuer-node-ui)
-- [Quick Start Demo](#quick-start-demo)
-- [Documentation](#documentation)
-- [Tools](#tools)
-- [License](#license)
-
-## Quick Start Installation
-> [!NOTE]
-> The provided installation guide is **non-production** ready. For production deployments please refer to  [Standalone Mode Guide](https://devs.polygonid.com/docs/issuer/setup-issuer-core/).
->
-> There is no compatibility with Windows environments at this time. While using WSL should be ok, it's not officially supported.
-
-### Prerequisites
-
-- Unix-based operating system (e.g. Debian, Arch, Mac OS)
-- [Docker Engine](https://docs.docker.com/engine/) `1.27+`
-- Makefile toolchain `GNU Make 3.81`
-- Publicly accessible URL - The issuer node API must be publicly reachable. Please make sure you properly configure your proxy or use a tool like [Localtunnel](https://theboroer.github.io/localtunnel-www/) for testing purposes.
-- Polygon Mumbai or Main RPC - You can get one in any of the providers of this list
-    - [Chainstack](https://chainstack.com/)
-    - [Ankr](https://ankr.com/)
-    - [QuickNode](https://quicknode.com/)
-    - [Alchemy](https://www.alchemy.com/)
-    - [Infura](https://www.infura.io/)
-
-### Issuer Node API
-
-In this section we will cover the installation of the Issuer Node API.
-
-> [!NOTE]
-> This Quick Installation Guide is prepared for Polygon Mumbai (Testnet) both for the state contract and issuer dids. If you want to deploy the node with Polygon Main configuration, please visit our [advanced Issuer Node configuration guide](https://devs.polygonid.com/docs/issuer/issuer-configuration/)).
-
-
-#### Deploy Issuer Node Infrastructure
-
-1. Copy the config sample files:
-
-    ```bash
-    cp .env-issuer.sample .env-issuer
-    cp .env-api.sample .env-api
-    ```
-
-2. Fill the .env-issuer config file with the proper variables:
-
-   *.env-issuer*
-    ```bash
-    ISSUER_ETHEREUM_URL=<YOUR_RPC_PROVIDER_URI_ENDPOINT>
-    ```
-3. Start the infrastructure:
-
-    ```bash
-    make up
-    ```
-
-4. Enable vault authentication:
-
-    ```bash
-    make add-vault-token
-    ```
-
-5. Write the private key in the vault. This step is needed in order to be able to transit the issuer's state. To perform that action the given account has to be funded. For Mumbai network you can request some testing Matic [here](https://mumbaifaucet.com/).
-
-    ```bash
-    make private_key=<YOUR_WALLET_PRIVATE_KEY> add-private-key
-    ```
-
-----
-**Troubleshooting:**
-
-In order to **stop** and **delete** all the containers.
-
-> [!WARNING]
-> This will permanently delete all data, making it necessary to create an Issuer DID again.
-
-``` bash
-make down
+```bash
+git clone https://github.com/Xiaod0ng/zkKYC-Issuer
 ```
 
-If you experience **problems** with the **vault**, follow these commands:
+3. Update `ISSUER_ETHEREUM_URL` variable in .env-issuer. I'm using Alchemy here.
 
-``` bash
-docker stop issuer-vault-1    // Stops the container issuer-vault-1 
-docker rm issuer-vault-1      // Removes container issuer-vault-1
-make clean-vault              // Removes all the data in the vault, including the token
-make up                       // Starts the database, cache and vault storage (i.e, postgres, redis and vault)
-```
-Wait 20 secs so the vault can boot and generate a token.
+4. Follow [docker documentation](https://docs.docker.com/desktop/wsl/) to turn on Docker Desktop for WSL
 
-``` bash
-make add-vault-token                                          // Adds the generated token to the ISSUER_KEY_STORE_TOKEN var in .env-issuer
-make private_key=<YOUR_WALLET_PRIVATE_KEY> add-private-key    // Stores the private key in the vault
+5. Run `make up` in Linux terminal
+
+6. Run the following command to add vault toekn to configuration file
+```bash
+make add-vault-token
 ```
 
-----
-#### Run Issuer Node API
-
-The issuer node is extensively configurable, for a detailed list of the configuration, please visit our [detailed configuration guide](https://devs.polygonid.com/docs/issuer/issuer-configuration/).
-
-1. Fill the .env-issuer config file with the proper variables:
-
-   *.env-issuer*
-    ```bash
-    ISSUER_API_AUTH_USER=user-issuer
-    ISSUER_API_AUTH_PASSWORD=password-issuer
-    ISSUER_SERVER_URL=<PUBLICLY_ACCESSIBLE_URL_POINTING_TO_ISSUER_SERVER_PORT>
-    ```
-
-2. Run api:
-
-    ```bash
-    make run
-    ```
-
-> Core API specification - http://localhost:3001/
-
----
-
-**Troubleshooting:**
-
-Restart the api.
-
-```bash 
-make restart-api
+7. Run the following command to set private key
+```bash
+make private_key=<YOUR_WALLET_PRIVATE_KEY> add-private-key;
 ```
 
----
-
-### Issuer Node UI
-
-In this section we will cover the installation of the Issuer Node UI, before continuing with these steps, make sure that you have followed the [Deploy Issuer Node Infrastructure](#Deploy-Issuer-Node-Infrastructure) section before continuing.
-
-In order to make the UI work, we will need configure some env variables in the `.env-api` file
-
-1. Copy .env-ui sample file and fill the needed env variables:
-
-
-    ```bash 
-    cp .env-ui.sample .env-ui
-    ```
-
-    *.env-ui*
-    ```bash
-    ISSUER_UI_AUTH_USERNAME=user-ui
-    ISSUER_UI_AUTH_PASSWORD=password-ui
-    ```
-    
-    *.env-api*
-    ```bash
-    ISSUER_API_UI_SERVER_URL={PUBLICLY_ACCESSIBLE_URL_POINTING_TO_ISSUER_API_UI_SERVER_PORT}
-    ```
-
-2. Generate Issuer DID:
-
-    ```bash
-    make generate-issuer-did
-    ```
-
-3. Run UI:
-
-    ```bash
-    make run-ui
-    ```
-
-
->**API UI specification** - http://localhost:3002/
-> 
->**UI** - http://localhost:8088/
-
----
-**Troubleshooting:**
-
-Restart the ui:
-
-```bash 
-make restart-ui
+8. Run the following command to generate a new issuer DID
+```bash
+make generate-issuer-did
 ```
----
 
-## Quick Start Demo
+9. Run `make run-ui` to start the webpage
 
-This [Quick Start Demo](https://devs.polygonid.com/docs/quick-start-demo/) will walk you through the process of **issuing** and **verifying** your **first credential**.
+After the above steps, http://localhost:8088 should work properly.
 
-## Documentation
+![Issuer UI](./readmeImage/image.png)
 
-* [Issuer Node resources](https://devs.polygonid.com/docs/category/issuer/)
-* [Polygon ID core concepts](https://devs.polygonid.com/docs/introduction/)
+## Public URLs setup
 
-## Tools
-> [!WARNING]
-> **Demo Issuer** and **Verifier Demo** are for **testing** purposes **only**.
+Open network tab when loading the UI page, you can find that UI page is calling UI API for schemas and status.
+![UI network](./readmeImage/image-1.png)
+
+To allow connection from Polygon ID wallet, you need to make both UI API (:3002) and UI (:8088) public. For temporary testing purpose, I am using ngrok and localtunnel to establish the public URLs. 
+
+1. In `.env-issuer`, edit `ISSUER_SERVER_URL` to ngrok static domain. In my case, the variable value is `https://usefully-blessed-sunbird.ngrok-free.app/`. You need to set your own value. Related ngrok documentation can be found [here](https://ngrok.com/docs/getting-started/?os=windows). 
+
+2. In `.env-api`, edit `ISSUER_API_UI_SERVER_URL` to localtunnel public URL. In my case, the variable value is `https://xd-issuer.loca.lt`. You need to set your own value. Related localtunnel documentation can be found [here](https://theboroer.github.io/localtunnel-www/).
+
+3. Run `make restart-ui` to restart the docker services since the environment variables are changed.
+
+4. Open a local terminal with administrator rights (localtunnel may return error if not with admin rights), run `lt --subdomain xd-issuer --port 3002` to establish issuer API public URL. You need to use your own value.
+
+5. Open `https://xd-issuer.loca.lt`, follow the instructions on the page to whitelist the IP address.
+
+6. After finishing the above steps, open ngrok terminal, run `ngrok http --domain usefully-blessed-sunbird.ngrok-free.app 8088` to start ngrok public URL. You need to use your own value.
+
+7. Open `https://usefully-blessed-sunbird.ngrok-free.app` in the browser, it should be like this. 
+![Public faced UI](./readmeImage/image-2.png)
 
 
-* [Schema Builder](https://schema-builder.polygonid.me/) - Create your custom schemas to issue VC.
-* [Demo Issuer UI](https://user-ui:password-ui@issuer-ui.polygonid.me/) - Test our Issuer Node UI.
-* [Verifier Demo](https://verifier-demo.polygonid.me/) - Verify your VCs.
-* [Polygon ID Android Mobile App](https://play.google.com/store/apps/details?id=com.polygonid.wallet&hl=en&gl=US)
-* [Polygon ID IOS Mobile App](https://apps.apple.com/us/app/polygon-id/id1629870183)
-* [Marketplace](https://marketplace.polygonid.me/) - Explore credentials submitted by trusted issuers.
+# Not the first time
 
-## License
+## Remove services and start again
 
-See [LICENSE](LICENSE.md).
+1. Run `make down` to remove existing services
+
+2. Run `make up` to start the services
+
+3. Run `make delete-did` to remove current DID
+
+4. Delete the value of ISSUER_API_UI_ISSUER_DID in .env-api
+
+5. Run `make generate-issuer-did` to generate a new issuer DID
+
+6. Run `make run` to start API
+
+7. Run `make run-ui` to start UI
+
+8. Follow [Public URLs setup](#public-urls-setup) to expose the public access.
+
+
+## Resume from last time
+
+If all variables are configured properly, you need to follow the steps below.
+
+1. Start Docker Desktop
+
+2. Go to the issuer-node folder, run `docker rm issuer-ui-1` to remove the image first, then run `make restart-ui` to start the ui again. This is caused by the issue illustrated [here](https://github.com/0xPolygonID/issuer-node/pull/542). 
+
+3. Follow [Public URLs setup](#public-urls-setup) to expose the public access.
+
+You should be able to navigate the sites.
+
+-------------------------------------------------------
+After v2.3.1, the issue has been fixed. Just start docker services and establish the public URLs.
+
+
+# Possible Problems
+
+1. Network error after starting UI
+
+    Usually because there are docker images not running. Make sure `make run` is executed before `make run-ui` so that the API image is properly initiated. Check docker logs for more information. Some related information in this [issue](https://github.com/0xPolygonID/issuer-node/issues/520)
+
+2. ngrok returns ERR_NGROK_3200 error
+
+    Close the terminal and run again.
+
+3. localtunnel returns server error
+
+    Run the terminal with administrator rights.
